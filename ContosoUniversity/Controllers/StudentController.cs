@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using ContosoUniversity.DAL;
 using ContosoUniversity.Models;
 
+
 namespace ContosoUniversity.Controllers
 {
     public class StudentController : Controller
@@ -16,12 +17,17 @@ namespace ContosoUniversity.Controllers
         private SchoolContext db = new SchoolContext();
 
         // GET: Student
-        public ActionResult Index(string sortOrder)
+        public ActionResult Index(string sortOrder, string searchString)
         {
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
             var students = from s in db.Students
                            select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                students = students.Where(s => s.LastName.Contains(searchString) ||
+                    s.FirstMidName.Contains(searchString));
+            }
             switch (sortOrder)
             {
                 case "name_desc":
@@ -30,7 +36,7 @@ namespace ContosoUniversity.Controllers
                 case "Date":
                     students = students.OrderBy(s => s.EnrollmentDate);
                     break;
-                case "date_desc" :
+                case "date_desc":
                     students = students.OrderByDescending(s => s.EnrollmentDate);
                     break;
                 default:
